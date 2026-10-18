@@ -9,9 +9,10 @@
 body{font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:var(--bg); color:var(--text); padding:2rem; display:flex; align-items:center; justify-content:center; min-height:100vh}
 .card{background:var(--card); padding:2rem; border-radius:8px; box-shadow:0 6px 18px rgba(12,20,40,0.08); width:100%; max-width:520px}
 h1{margin:0 0 1rem 0; font-size:1.25rem}
+.settings summary{cursor:pointer; font-weight:600; margin-bottom:.5rem}
 .controls{display:flex; gap:1rem; margin-bottom:1rem; align-items:center}
 .controls label{font-size:0.9rem}
-.controls input{margin-left:.5rem; padding:.35rem .5rem; width:6.5rem}
+.controls input{margin-left:.5rem; padding:.35rem .5rem; width:8rem}
 .display-area{display:flex; align-items:baseline; gap:1rem; margin-bottom:1rem}
 .display{font-size:2.25rem; font-weight:600}
 .status{color:#6b7280}

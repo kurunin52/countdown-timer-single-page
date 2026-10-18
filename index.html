@@ -12,17 +12,20 @@
   <main class="card">
     <h1>カウントダウンタイマー</h1>
 
-    <div class="controls">
-      <label>
-        開始カウント:
-        <input id="start-value" type="number" min="0" value="60">
-      </label>
+    <details class="settings">
+      <summary>設定を表示</summary>
+      <div class="controls">
+        <label>
+          開始カウント:
+          <input id="start-value" type="number" min="1" value="60">
+        </label>
 
-      <label>
-        間隔 (秒):
-        <input id="interval-value" type="number" min="0.1" step="0.1" value="1">
-      </label>
-    </div>
+        <label>
+          合計経過秒数:
+          <input id="total-duration" type="number" min="0.1" step="0.1" value="60">
+        </label>
+      </div>
+    </details>
 
     <div class="display-area">
       <div id="display" class="display">60</div>
@@ -32,10 +35,11 @@
     <div class="buttons">
       <button id="start" class="btn" _="on click
         set the value of #remaining to the value of #start-value
+        set the value of #interval to the value of #total-duration divided by the value of #start-value
         put the value of #remaining into #display
         set the data-running of #app to 'true'
         put '' into #status
-        every (the value of #interval-value)s while the data-running of #app is 'true'
+        every (the value of #interval)s while the data-running of #app is 'true'
           if the value of #remaining > 0
             add -1 to the value of #remaining
             put the value of #remaining into #display
@@ -58,18 +62,22 @@
       ">Reset</button>
     </div>
 
-    <!-- hidden state holder -->
+    <!-- hidden state holders -->
     <input id="remaining" type="number" value="60" hidden>
+    <input id="interval" type="number" value="1" hidden>
 
     <footer class="note">
       このシングルページは Hyperscript によるカウントダウンを実装しています。GitHub Pages で公開できます。
     </footer>
   </main>
 
-  <!-- 初期表示のセット（Hyperscript でも可能だが、ここでは軽く初期化） -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
+      // 初期表示
       document.getElementById('display').textContent = document.getElementById('remaining').value;
+      // details を閉じたままにする（デフォルト）
+      const details = document.querySelector('details.settings');
+      if (details) details.open = false;
     });
   </script>
 </body>

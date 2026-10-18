@@ -20,15 +20,19 @@
           <input id="start-value" type="number" min="1" value="60">
         </label>
 
-        <label>
-          合計経過秒数:
-          <input id="total-duration" type="number" min="0.1" step="0.1" value="60">
-        </label>
+        <!-- 合計経過秒数は常に表示 -->
       </div>
     </details>
 
+    <div class="controls always-visible">
+      <label>
+        合計経過秒数:
+        <input id="total-duration" type="number" min="0.1" step="0.1" value="60">
+      </label>
+    </div>
+
     <div class="display-area">
-      <div id="display" class="display">60</div>
+      <div id="display" class="display">00:01:00</div>
       <div id="status" class="status">Ready</div>
     </div>
 
@@ -36,13 +40,13 @@
       <button id="start" class="btn" _="on click
         set the value of #remaining to the value of #start-value
         set the value of #interval to the value of #total-duration divided by the value of #start-value
-        put the value of #remaining into #display
+        put (call formatTime with the value of #remaining) into #display
         set the data-running of #app to 'true'
         put '' into #status
         every (the value of #interval)s while the data-running of #app is 'true'
           if the value of #remaining > 0
             add -1 to the value of #remaining
-            put the value of #remaining into #display
+            put (call formatTime with the value of #remaining) into #display
           else
             put 'Done' into #status
             set the data-running of #app to 'false'
@@ -56,7 +60,7 @@
 
       <button id="reset" class="btn" _="on click
         set the value of #remaining to the value of #start-value
-        put the value of #remaining into #display
+        put (call formatTime with the value of #remaining) into #display
         set the data-running of #app to 'false'
         put 'Ready' into #status
       ">Reset</button>
@@ -72,11 +76,25 @@
   </main>
 
   <script>
+    // 時間表示を HH:MM:SS 形式で返すユーティリティ（Hyperscript から呼び出す）
+    function pad(n) { return n.toString().padStart(2, '0'); }
+    function formatTime(totalSeconds) {
+      // totalSeconds が文字列のことがあるため数値にする
+      var s = Math.max(0, parseInt(totalSeconds, 10) || 0);
+      var hours = Math.floor(s / 3600);
+      var minutes = Math.floor((s % 3600) / 60);
+      var seconds = s % 60;
+      return pad(hours) + ':' + pad(minutes) + ':' + pad(seconds);
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       // 初期表示
-      document.getElementById('display').textContent = document.getElementById('remaining').value;
+      var remainingInput = document.getElementById('remaining');
+      var display = document.getElementById('display');
+      display.textContent = formatTime(remainingInput.value);
+
       // details を閉じたままにする（デフォルト）
-      const details = document.querySelector('details.settings');
+      var details = document.querySelector('details.settings');
       if (details) details.open = false;
     });
   </script>

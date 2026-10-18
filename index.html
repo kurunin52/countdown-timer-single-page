@@ -5,10 +5,8 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Countdown Timer - Single Page</title>
   <link rel="stylesheet" href="styles.css">
-  <!-- Hyperscript -->
-  <script src="https://unpkg.com/hyperscript.org@0.9.10"></script>
 </head>
-<body id="app" data-running="false">
+<body id="app">
   <main class="card">
     <h1>カウントダウンタイマー</h1>
 
@@ -19,8 +17,6 @@
           開始カウント:
           <input id="start-value" type="number" min="1" value="60">
         </label>
-
-        <!-- 合計経過秒数は常に表示 -->
       </div>
     </details>
 
@@ -37,46 +33,21 @@
     </div>
 
     <div class="buttons">
-      <button id="start" class="btn" _="on click
-        set the value of #remaining to the value of #start-value
-        set the value of #interval to (the value of #total-duration) / (the value of #start-value)
-        set the attribute 'data-running' of #app to 'true'
-        put '' into #status
-        every (the value of #interval)s while the attribute 'data-running' of #app is 'true'
-          if the value of #remaining > 0
-            add -1 to the value of #remaining
-          else
-            put 'Done' into #status
-            set the attribute 'data-running' of #app to 'false'
-            break
-      ">Start</button>
-
-      <button id="stop" class="btn" _="on click
-        set the attribute 'data-running' of #app to 'false'
-        put 'Stopped' into #status
-      ">Stop</button>
-
-      <button id="reset" class="btn" _="on click
-        set the value of #remaining to the value of #start-value
-        set the attribute 'data-running' of #app to 'false'
-        put 'Ready' into #status
-      ">Reset</button>
+      <button id="start" class="btn">Start</button>
+      <button id="stop" class="btn">Stop</button>
+      <button id="reset" class="btn">Reset</button>
     </div>
 
-    <!-- hidden state holders -->
-    <input id="remaining" type="number" value="60" hidden>
-    <input id="interval" type="number" value="1" hidden>
-
     <footer class="note">
-      このシングルページは Hyperscript によるカウントダウンを実装しています。GitHub Pages で公開できます。
+      このシングルページは純粋な JavaScript によるカウントダウンで、合計秒数を指定して開始カウントを与えた数値をその秒数で減らします。
     </footer>
   </main>
 
   <script>
-    // 時間表示を HH:MM:SS 形式で返すユーティリティ（JS側で表示を担当）
-    function pad(n) { return n.toString().padStart(2, '0'); }
+    // utility: format seconds as HH:MM:SS
+    function pad(n) { return String(n).padStart(2, '0'); }
     function formatTime(totalSeconds) {
-      var s = Math.max(0, parseInt(totalSeconds, 10) || 0);
+      var s = Math.max(0, Math.floor(Number(totalSeconds) || 0));
       var hours = Math.floor(s / 3600);
       var minutes = Math.floor((s % 3600) / 60);
       var seconds = s % 60;
@@ -84,24 +55,83 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-      // 初期表示
-      var remainingInput = document.getElementById('remaining');
-      var display = document.getElementById('display');
-      display.textContent = formatTime(remainingInput.value);
+      var startValueEl = document.getElementById('start-value');
+      var totalDurationEl = document.getElementById('total-duration');
+      var displayEl = document.getElementById('display');
+      var statusEl = document.getElementById('status');
+      var startBtn = document.getElementById('start');
+      var stopBtn = document.getElementById('stop');
+      var resetBtn = document.getElementById('reset');
 
-      // details を閉じたままにする（デフォルト）
-      var details = document.querySelector('details.settings');
-      if (details) details.open = false;
+      var remaining = parseInt(startValueEl.value, 10) || 60;
+      var timerId = null;
 
-      // ポーリングで #remaining の値変化を検知して表示をフォーマットする
-      var last = null;
-      setInterval(function () {
-        var v = parseInt(remainingInput.value, 10) || 0;
-        if (v !== last) {
-          last = v;
-          display.textContent = formatTime(v);
+      function updateDisplay() {
+        displayEl.textContent = formatTime(remaining);
+      }
+
+      // initial
+      updateDisplay();
+
+      function computeIntervalSeconds() {
+        var total = Math.max(0, Number(totalDurationEl.value) || 0);
+        var count = Math.max(1, parseInt(startValueEl.value, 10) || 60);
+        // interval in seconds between decrements
+        return total / count;
+      }
+
+      startBtn.addEventListener('click', function () {
+        // reset remaining to start value
+        remaining = Math.max(0, parseInt(startValueEl.value, 10) || 60);
+        updateDisplay();
+        statusEl.textContent = '';
+
+        var intervalSec = computeIntervalSeconds();
+        if (intervalSec <= 0) {
+          statusEl.textContent = 'Invalid total duration';
+          return;
         }
-      }, 100);
+
+        // clear any existing timer
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+
+        // use setInterval with millisecond precision
+        var intervalMs = Math.max(10, Math.round(intervalSec * 1000));
+
+        timerId = setInterval(function () {
+          if (remaining > 0) {
+            remaining -= 1;
+            updateDisplay();
+          } else {
+            clearInterval(timerId);
+            timerId = null;
+            statusEl.textContent = 'Done';
+          }
+        }, intervalMs);
+      });
+
+      stopBtn.addEventListener('click', function () {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+          statusEl.textContent = 'Stopped';
+        }
+      });
+
+      resetBtn.addEventListener('click', function () {
+        if (timerId !== null) {
+          clearInterval(timerId);
+          timerId = null;
+        }
+        remaining = Math.max(0, parseInt(startValueEl.value, 10) || 60);
+        updateDisplay();
+        statusEl.textContent = 'Ready';
+      });
+
+      // if start-value or total-duration changed while running, the next Start will use new values
     });
   </script>
 </body>

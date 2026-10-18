@@ -27,7 +27,7 @@
     <div class="controls always-visible">
       <label>
         合計経過秒数:
-        <input id="total-duration" type="number" min="0.1" step="0.1" value="60">
+        <input id="total-duration" type="number" min="1" step="1" value="60">
       </label>
     </div>
 
@@ -39,29 +39,29 @@
     <div class="buttons">
       <button id="start" class="btn" _="on click
         set the value of #remaining to the value of #start-value
-        set the value of #interval to the value of #total-duration divided by the value of #start-value
-        put (call formatTime with the value of #remaining) into #display
-        set the data-running of #app to 'true'
+        set the value of #interval to (the value of #total-duration) / (the value of #start-value)
+        put call formatTime with the value of #remaining into #display
+        set the data-running attribute of #app to 'true'
         put '' into #status
-        every (the value of #interval)s while the data-running of #app is 'true'
+        every (the value of #interval)s while the data-running attribute of #app is 'true'
           if the value of #remaining > 0
             add -1 to the value of #remaining
-            put (call formatTime with the value of #remaining) into #display
+            put call formatTime with the value of #remaining into #display
           else
             put 'Done' into #status
-            set the data-running of #app to 'false'
+            set the data-running attribute of #app to 'false'
             break
       ">Start</button>
 
       <button id="stop" class="btn" _="on click
-        set the data-running of #app to 'false'
+        set the data-running attribute of #app to 'false'
         put 'Stopped' into #status
       ">Stop</button>
 
       <button id="reset" class="btn" _="on click
         set the value of #remaining to the value of #start-value
-        put (call formatTime with the value of #remaining) into #display
-        set the data-running of #app to 'false'
+        put call formatTime with the value of #remaining into #display
+        set the data-running attribute of #app to 'false'
         put 'Ready' into #status
       ">Reset</button>
     </div>

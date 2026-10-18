@@ -40,28 +40,28 @@
       <button id="start" class="btn" _="on click
         set the value of #remaining to the value of #start-value
         set the value of #interval to (the value of #total-duration) / (the value of #start-value)
-        put call formatTime with the value of #remaining into #display
-        set the data-running attribute of #app to 'true'
+        put the value of #remaining into #display
+        set the data-running of #app to 'true'
         put '' into #status
-        every (the value of #interval)s while the data-running attribute of #app is 'true'
+        every (the value of #interval)s while the data-running of #app is 'true'
           if the value of #remaining > 0
             add -1 to the value of #remaining
-            put call formatTime with the value of #remaining into #display
+            put the value of #remaining into #display
           else
             put 'Done' into #status
-            set the data-running attribute of #app to 'false'
+            set the data-running of #app to 'false'
             break
       ">Start</button>
 
       <button id="stop" class="btn" _="on click
-        set the data-running attribute of #app to 'false'
+        set the data-running of #app to 'false'
         put 'Stopped' into #status
       ">Stop</button>
 
       <button id="reset" class="btn" _="on click
         set the value of #remaining to the value of #start-value
-        put call formatTime with the value of #remaining into #display
-        set the data-running attribute of #app to 'false'
+        put the value of #remaining into #display
+        set the data-running of #app to 'false'
         put 'Ready' into #status
       ">Reset</button>
     </div>
@@ -76,10 +76,10 @@
   </main>
 
   <script>
-    // 時間表示を HH:MM:SS 形式で返すユーティリティ（Hyperscript から呼び出す）
+    // 時間表示を HH:MM:SS 形式で返すユーティリティ（Hyperscript から呼び出す代わりに
+    // このスクリプトが #remaining を監視して表示を更新します）
     function pad(n) { return n.toString().padStart(2, '0'); }
     function formatTime(totalSeconds) {
-      // totalSeconds が文字列のことがあるため数値にする
       var s = Math.max(0, parseInt(totalSeconds, 10) || 0);
       var hours = Math.floor(s / 3600);
       var minutes = Math.floor((s % 3600) / 60);
@@ -96,6 +96,16 @@
       // details を閉じたままにする（デフォルト）
       var details = document.querySelector('details.settings');
       if (details) details.open = false;
+
+      // ポーリングで #remaining の値変化を検知して表示をフォーマットする
+      var last = null;
+      setInterval(function () {
+        var v = parseInt(remainingInput.value, 10) || 0;
+        if (v !== last) {
+          last = v;
+          display.textContent = formatTime(v);
+        }
+      }, 100);
     });
   </script>
 </body>
